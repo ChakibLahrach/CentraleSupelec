@@ -23,7 +23,9 @@ t = np.linspace(0, 100, N)
 
 # Fonction Euler
 def Euler(initialCondition):
-    x0, y0, z0 = initialCondition
+    # Entrée : Un np array donnant les conditions initals
+    # Sortie : Une liste contenant le schéma d'Euler associé à l'équation différentielle
+    x0, y0, z0 = initialCondition[0], initialCondition[1], initialCondition[2]
     delta = t[1] - t[0]
     x = [x0] + [0] * (N - 1)
     y = [y0] + [0] * (N - 1)
@@ -32,19 +34,19 @@ def Euler(initialCondition):
         x[n+1] = x[n] + delta * (z[n] + (y[n] - a) * x[n])
         y[n+1] = y[n] + delta * (1 - b * y[n] - x[n]**2)
         z[n+1] = z[n] + delta * (-x[n] - c * z[n])
-    return np.array(x), np.array(y), np.array(z)
+    return x, y, z
 
 # Points d'équilibre
 epsilon = 1e-3
-X0 = (0+epsilon, 1 / b + epsilon, 0 + epsilon)
-x0, y0, z0 = Euler(X0)
+X0 = np.array([0, 1/b, 0])
+x0, y0, z0 = Euler(X0 + epsilon)
 if  a < 1/b - 1/c:
     print("Le système a 3 points d'équilibres")
-    X1 = (np.sqrt(1 - b * a - b / c) + epsilon, a + 1 / c + epsilon, -1 / c * np.sqrt(1 - b * a - b / c) + epsilon)
-    X2 = (-np.sqrt(1 - b * a - b / c)+ epsilon, a + 1 / c + epsilon , 1 / c * np.sqrt(1 - b * a - b / c) + epsilon)
+    X1 = np.array([np.sqrt(1 - b * a - b / c) , a + 1 / c , -1 / c * np.sqrt(1 - b * a - b / c)])
+    X2 = np.array([-np.sqrt(1 - b * a - b / c), a + 1 / c , 1 / c * np.sqrt(1 - b * a - b / c)])
     # Calcul des trajectoires
-    x1, y1, z1 = Euler(X1)
-    x2, y2, z2 = Euler(X2)
+    x1, y1, z1 = Euler(X1 + epsilon)
+    x2, y2, z2 = Euler(X2 + epsilon)
 else:
     print("Le système a exactement 1 point d'équilibre")
 
@@ -69,26 +71,24 @@ def create_animation(fig, x, y, z, title):
         line.set_3d_properties(z[:frame])
         return line,
 
-    ani = FuncAnimation(fig, update, frames=len(t), init_func=init, blit=False, interval=50)
+    ani = FuncAnimation(fig, update, frames=len(t), init_func=init, blit=False, interval=1)
     return ani
 
 
 # Calcul algébrique des valeurs propres de la Jacobienne aux différents points d'équilibres
 
+
 def J(X):
-    x, y, z = X
-    return np.array([[y-a, x, 1], [-2*x, -b, 0], [-1, 0, -c]])
-
-
+    return np.array([[X[1]-a, X[0], 1], [-2*X[0], -b, 0], [-1, 0, -c]])
+    
 print("Les valeurs propres de X0 : ", np.linalg.eig(J(X0))[0])
 if a < 1/b - 1/c:
     print("Les valeurs propres de X1 : ", np.linalg.eig(J(X1))[0])
-    print("Les valeurs propres de X2 : ", np.linalg.eig(J(X0))[0])
+    print("Les valeurs propres de X2 : ", np.linalg.eig(J(X2))[0])
 
 
 # Création des trois figures et animation
-
-
+''' 
 
 fig0 = plt.figure()
 ani0 = create_animation(fig0, x0, y0, z0, "Trajectoire X0")
@@ -102,4 +102,5 @@ if 1 - b * a - b / c >= 0:
 
 # Affichage
 plt.show()
+'''
 
